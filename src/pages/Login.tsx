@@ -6,18 +6,30 @@ import { useAuthStore } from '../store/auth';
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(username, password);
-    navigate('/');
+    setError('');
+    
+    try {
+      await login(username, password);
+      navigate('/');
+    } catch (error) {
+      setError('Login failed. Please check your credentials.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
       <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/20 text-red-300 rounded-lg">
+            {error}
+          </div>
+        )}
         <div className="flex items-center justify-center mb-8">
           <Terminal size={40} className="text-blue-500" />
         </div>

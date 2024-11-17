@@ -8,22 +8,30 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
   const register = useAuthStore((state) => state.register);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     try {
       await register(email, password, username);
       navigate('/');
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'Registration failed');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
       <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/20 text-red-300 rounded-lg">
+            {error}
+          </div>
+        )}
         <div className="flex items-center justify-center mb-8">
           <Terminal size={40} className="text-green-500" />
         </div>
