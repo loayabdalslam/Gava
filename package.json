@@ -5,18 +5,29 @@
   "type": "module",
   "scripts": {
     "server": "node src/backend/server.js",
-    "dev": "vite"
+    "dev": "vite",
+    "test": "NODE_ENV=test jest"
+  },
+  "jest": {
+    "transform": {},
+    "testEnvironment": "node",
+    "extensionsToTreatAsEsm": [".ts"],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
     "@tailwindcss/typography": "^0.5.10",
     "@types/react-syntax-highlighter": "^15.5.11",
     "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
     "clsx": "^2.1.0",
     "cors": "^2.8.5",
     "date-fns": "^3.3.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -30,17 +41,23 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
+    "@jest/globals": "^29.7.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "jest": "^29.7.0",
     "neo4j-driver": "^5.26.0",
     "nodemon": "^3.1.7",
     "postcss": "^8.4.35",
+    "supertest": "^7.0.0",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

@@ -1,70 +1,71 @@
 import { create } from 'zustand';
 import { Post } from '../types';
+import { neo4jService } from '../services/neo4j';
 
 interface PostsState {
   posts: Post[];
-  addPost: (content: string, hashtags: string[]) => void;
-  likePost: (postId: string, userId: string) => void;
-  sharePost: (postId: string) => void;
+  loading: boolean;
+  error: string | null;
+  fetchPosts: () => Promise<void>;
+  addPost: (content: string, hashtags: string[]) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
+  likePost: (postId: string) => Promise<void>;
+  sharePost: (postId: string) => Promise<void>;
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    authorId: '1',
-    content: '🚀 Just launched my new React project! Check out the code:\n\n```typescript\nconst App = () => {\n  return <div>Hello World!</div>;\n};\n```\n\n#react #typescript',
-    createdAt: new Date(),
-    likes: [],
-    shares: 0,
-    hashtags: ['#react', '#typescript']
-  },
-  {
-    id: '2',
-    authorId: '1',
-    content: 'TIL: You can use the nullish coalescing operator (??) to provide default values:\n\n```javascript\nconst value = null;\nconst result = value ?? "default";\nconsole.log(result); // "default"\n```\n\n#javascript #coding',
-    createdAt: new Date(Date.now() - 86400000),
-    likes: [],
-    shares: 0,
-    hashtags: ['#javascript', '#coding']
-  }
-];
-
 export const usePostsStore = create<PostsState>((set) => ({
-  posts: mockPosts,
-  addPost: (content, hashtags) =>
-    set((state) => ({
-      posts: [
-        {
-          id: Date.now().toString(),
-          authorId: '1',
-          content,
-          createdAt: new Date(),
-          likes: [],
-          shares: 0,
-          hashtags,
-        },
-        ...state.posts,
-      ],
-    })),
-  likePost: (postId, userId) =>
-    set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              likes: post.likes.includes(userId)
-                ? post.likes.filter((id) => id !== userId)
-                : [...post.likes, userId],
-            }
-          : post
-      ),
-    })),
-  sharePost: (postId) =>
-    set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === postId
-          ? { ...post, shares: post.shares + 1 }
-          : post
-      ),
-    })),
+  posts: [],
+  loading: false,
+  error: null,
+  fetchPosts: async () => {
+    set({ loading: true, error: null });
+    try {
+      const posts = await neo4jService.getPosts();
+      set({ posts, loading: false });
+    } catch (error: any) {
+      set({ error: error.message, loading: false });
+    }
+  },
+  addPost: async (content, hashtags) => {
+    try {
+      const post = await neo4jService.createPost({ content, hashtags });
+      set((state) => ({ posts: [post, ...state.posts] }));
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+  deletePost: async (postId) => {
+    try {
+      await neo4jService.deletePost(postId);
+      set((state) => ({
+        posts: state.posts.filter((post) => post.id !== postId)
+      }));
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+  likePost: async (postId) => {
+    try {
+      const updatedPost = await neo4jService.likePost(postId);
+      set((state) => ({
+        posts: state.posts.map((post) =>
+          post.id === postId ? updatedPost : post
+        )
+      }));
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+  sharePost: async (postId) => {
+    try {
+      const updatedPost = await neo4jService.sharePost(postId);
+      set((state) => ({
+        posts: state.posts.map((post) =>
+          post.id === postId ? updatedPost : post
+        )
+      }));
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  }
 }));

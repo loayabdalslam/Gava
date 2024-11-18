@@ -2,11 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.js';
+import postRoutes from './routes/post.js';
 import Neo4jConnection from './config/neo4j.js';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api', userRoutes);
+app.use('/api', postRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -26,9 +28,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something broke!' });
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

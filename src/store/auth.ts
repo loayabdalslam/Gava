@@ -15,11 +15,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   login: async (username, password) => {
     try {
-      const user = await neo4jService.getUser(username);
+      const response = await neo4jService.login(username, password);
+      const { user, token } = response;
+      neo4jService.setAuthToken(token);
       set({ user, isAuthenticated: true });
     } catch (error) {
       console.error('Login failed:', error);
-      throw error;
+      throw new Error('Invalid credentials');
     }
   },
   register: async (email, password, username) => {
